@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: vetclinic-db
+    environment:
+      POSTGRES_DB: vetclinic
+      POSTGRES_USER: vetclinic
+      POSTGRES_PASSWORD: vetclinic
+    ports:
+      - "5432:5432"
+    volumes:
+      - vetclinic-data:/var/lib/postgresql/data
+
+volumes:
+  vetclinic-data:
