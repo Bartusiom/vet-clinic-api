@@ -1,0 +1,31 @@
+### Dodaj psa
+POST http://localhost:8080/api/pets
+Content-Type: application/json
+
+{
+  "name": "Burek",
+  "species": "DOG",
+  "birthDate": "2020-05-10",
+  "ownerName": "Jan Kowalski",
+  "ownerPhone": "123456789"
+}
+
+### Wszystkie zwierzęta
+GET http://localhost:8080/api/pets
+
+### Tylko psy
+GET http://localhost:8080/api/pets?species=DOG
+
+### Po id
+GET http://localhost:8080/api/pets/1
+
+### Błędna walidacja (400)
+POST http://localhost:8080/api/pets
+Content-Type: application/json
+
+{
+  "name": "",
+  "species": "DOG",
+  "ownerName": "Jan Kowalski",
+  "ownerPhone": "abc"
+}
