@@ -22,7 +22,7 @@ Content-Type: application/json
 {
   "firstName": "Anna",
   "lastName": "Nowak",
-  "specialization": "SURGEON"
+  "specialization": "SURGERY"
 }
 
 > {% client.global.set("vetId", response.body.id); %}
