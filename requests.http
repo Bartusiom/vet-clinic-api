@@ -1,5 +1,8 @@
-### Dodaj psa
-POST http://localhost:8080/api/pets
+@baseUrl = http://localhost:8080
+@start = 2027-01-15T10:00:00
+
+### 1. Create pet
+POST {{baseUrl}}/api/pets
 Content-Type: application/json
 
 {
@@ -7,25 +10,127 @@ Content-Type: application/json
   "species": "DOG",
   "birthDate": "2020-05-10",
   "ownerName": "Jan Kowalski",
-  "ownerPhone": "123456789"
+  "ownerPhone": "500600700"
 }
 
-### Wszystkie zwierzęta
-GET http://localhost:8080/api/pets
+> {% client.global.set("petId", response.body.id); %}
 
-### Tylko psy
-GET http://localhost:8080/api/pets?species=DOG
-
-### Po id
-GET http://localhost:8080/api/pets/1
-
-### Błędna walidacja (400)
-POST http://localhost:8080/api/pets
+### 2. Create vet
+POST {{baseUrl}}/api/vets
 Content-Type: application/json
 
 {
-  "name": "",
-  "species": "DOG",
-  "ownerName": "Jan Kowalski",
-  "ownerPhone": "abc"
+  "firstName": "Anna",
+  "lastName": "Nowak",
+  "specialization": "SURGEON"
 }
+
+> {% client.global.set("vetId", response.body.id); %}
+
+### 3. Book checkup 10:00-10:30 -> 201
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "{{start}}",
+  "type": "checkup"
+}
+
+> {% client.global.set("appointmentId", response.body.id); %}
+
+### 4. Overlapping slot 10:15 -> 409
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "2027-01-15T10:15:00",
+  "type": "VACCINATION"
+}
+
+### 5. Back-to-back slot 10:30 -> 201
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "2027-01-15T10:30:00",
+  "type": "VACCINATION"
+}
+
+### 6. Unknown type -> 400
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "2027-01-15T14:00:00",
+  "type": "DENTAL"
+}
+
+### 7. Start time in the past -> 400 (fieldErrors.startTime)
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "2020-01-01T10:00:00",
+  "type": "CHECKUP"
+}
+
+### 8. Missing fields -> 400 (fieldErrors)
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "startTime": "2027-01-15T15:00:00"
+}
+
+### 9. Malformed body -> 400
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{ "petId": "abc"
+
+### 10. Non-existing pet -> 404
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": 999999,
+  "vetId": {{vetId}},
+  "startTime": "2027-01-15T16:00:00",
+  "type": "CHECKUP"
+}
+
+### 11. List vet appointments -> 200
+GET {{baseUrl}}/api/appointments?vetId={{vetId}}
+
+### 12. List for non-existing vet -> 404
+GET {{baseUrl}}/api/appointments?vetId=999999
+
+### 13. Cancel first appointment -> 200, status CANCELLED
+PATCH {{baseUrl}}/api/appointments/{{appointmentId}}/cancel
+
+### 14. Cancel again -> 409
+PATCH {{baseUrl}}/api/appointments/{{appointmentId}}/cancel
+
+### 15. Book the freed 10:00 slot again -> 201
+POST {{baseUrl}}/api/appointments
+Content-Type: application/json
+
+{
+  "petId": {{petId}},
+  "vetId": {{vetId}},
+  "startTime": "{{start}}",
+  "type": "CHECKUP"
+}
+
+### 16. Cancel non-existing appointment -> 404
+PATCH {{baseUrl}}/api/appointments/999999/cancel
