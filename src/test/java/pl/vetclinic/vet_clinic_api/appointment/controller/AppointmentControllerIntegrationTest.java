@@ -117,7 +117,7 @@ class AppointmentControllerIntegrationTest {
     private Pet createPet() {
         Pet pet = new Pet();
         pet.setName("Burek");
-        pet.setSpecies(Species.values()[0]);
+        pet.setSpecies(Species.DOG);
         pet.setOwnerName("Jan Kowalski");
         pet.setOwnerPhone("500600700");
         return pet;
@@ -127,7 +127,7 @@ class AppointmentControllerIntegrationTest {
         Vet vet = new Vet();
         vet.setFirstName("Anna");
         vet.setLastName("Nowak");
-        vet.setSpecialization(Specialization.values()[0]);
+        vet.setSpecialization(Specialization.SURGERY);
         return vet;
     }
 }
